@@ -25,6 +25,5 @@ export async function register(values: z.infer<typeof RegisterSchema>) {
       password: hashedPassword,
     },
   });
-  // todo: send verification email
-  return { success: "Email sent!" };
+  return { success: true };
 }

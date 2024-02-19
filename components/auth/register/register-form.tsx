@@ -37,7 +37,7 @@ function RegisterForm() {
     startTransition(() => {
       register(value).then((data) => {
         setError(data.error);
-        setSuccess(data.success);
+        setSuccess(data?.success);
       });
     });
   }
