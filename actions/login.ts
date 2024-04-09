@@ -5,13 +5,44 @@ import { DiAws } from "react-icons/di";
 import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
+import { getUserByEmail } from "@/data/user";
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function login(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "Invalid fields" };
   }
+
   const { email, password } = validatedFields.data;
+  const existingUser = await getUserByEmail(email);
+
+  if (!existingUser || !existingUser.password || !existingUser.email) {
+    return { error: "Email does not exist" };
+  }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email
+    );
+
+    if (!verificationToken) {
+      return { error: "Failed to send verification email" };
+    }
+
+    const response = await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token
+    );
+
+    if (response.error) {
+      return { error: "Failed to send verification email" };
+    }
+
+    return { success: "Confirmation email sent!" };
+  }
+
   try {
     await signIn("credentials", {
       email,
@@ -20,7 +51,6 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      console.log("🚀 ~ login ~ error:", error);
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials" };
