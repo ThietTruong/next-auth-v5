@@ -37,7 +37,6 @@ export async function register(values: z.infer<typeof RegisterSchema>) {
     verificationToken.email,
     verificationToken.token
   );
-  console.log("🚀 ~ register ~ response:", response);
 
   return { success: "Confirmation email sent" };
 }
