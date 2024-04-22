@@ -11,36 +11,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { LoginSchema } from "@/schemas";
+import { ResetSchema } from "@/schemas";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { Input } from "@/components/ui/input";
 import { Button } from "../../ui/button";
 import { login } from "@/actions/login";
 import { FormError } from "../../form-error";
 import { FormSuccess } from "../../form-success";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-function LoginForm() {
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") == "OAuthAccountNotLinked"
-      ? "Email already linked to another account"
-      : undefined;
+import { reset } from "@/actions/reset";
+function ResetForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = React.useState<string | undefined>();
   const [success, setSuccess] = React.useState<string | undefined>();
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetSchema>>({
+    resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
-  function submit(value: z.infer<typeof LoginSchema>) {
+  function submit(value: z.infer<typeof ResetSchema>) {
     setSuccess(undefined);
     setError(undefined);
     startTransition(() => {
-      login(value).then((data) => {
+      reset(value).then((data) => {
         setError(data?.error);
         setSuccess(data?.success);
       });
@@ -49,9 +42,8 @@ function LoginForm() {
   return (
     <CardWrapper
       headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
-      showSocial
+      backButtonLabel="Back to login"
+      backButtonHref="/auth/login"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(submit)} className="space-y-6">
@@ -69,28 +61,12 @@ function LoginForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="" type="password" />
-                  </FormControl>
-                  <Button size="sm" variant="link">
-                    <Link href="/auth/reset">Forgot password?</Link>
-                  </Button>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
-          <FormError message={error || urlError} />
+          <FormError message={error} />
           <FormSuccess message={success} />
 
-          <Button className="w-full" type="submit" disabled={isPending}>
-            Login
+          <Button className="w-full" disabled={isPending}>
+            Reset
           </Button>
         </form>
       </Form>
@@ -98,4 +74,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default ResetForm;

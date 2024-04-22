@@ -31,3 +31,9 @@ export const RegisterSchema = z.object({
       message: "Name is required",
     }),
 });
+
+export const ResetSchema = z.object({
+  email: z.string({
+    invalid_type_error: "Email must be a string",
+  }),
+});

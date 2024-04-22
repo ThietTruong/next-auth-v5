@@ -13,7 +13,6 @@ export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const onSubmit = useCallback(() => {
-    if (error || success) return;
     if (!token) {
       setError("Token does not exist");
       return;
