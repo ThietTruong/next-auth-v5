@@ -1,5 +1,5 @@
 "use client";
-import React, { useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +26,7 @@ function LoginForm() {
     searchParams.get("error") == "OAuthAccountNotLinked"
       ? "Email already linked to another account"
       : undefined;
+  const [showToFactor, setShowToFactor] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = React.useState<string | undefined>();
   const [success, setSuccess] = React.useState<string | undefined>();
@@ -40,10 +41,23 @@ function LoginForm() {
     setSuccess(undefined);
     setError(undefined);
     startTransition(() => {
-      login(value).then((data) => {
-        setError(data?.error);
-        setSuccess(data?.success);
-      });
+      login(value)
+        .then((data) => {
+          if (data?.error) {
+            setError(data?.error);
+            form.reset();
+          }
+          if (data?.success) {
+            setSuccess(data?.success);
+          }
+          if (data?.twoFactor) {
+            setShowToFactor(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          setError("Something went wrong!!!");
+        });
     });
   }
   return (
@@ -56,41 +70,62 @@ function LoginForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(submit)} className="space-y-6">
           <div className="space-y-4">
-            <FormField
-              name="email"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Ex: jGvR0@example.com" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="" type="password" />
-                  </FormControl>
-                  <Button size="sm" variant="link">
-                    <Link href="/auth/reset">Forgot password?</Link>
-                  </Button>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {showToFactor && (
+              <>
+                <FormField
+                  name="code"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Two Factor Code</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+            {!showToFactor && (
+              <>
+                <FormField
+                  name="email"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Ex: jGvR0@example.com" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="" type="password" />
+                      </FormControl>
+                      <Button size="sm" variant="link">
+                        <Link href="/auth/reset">Forgot password?</Link>
+                      </Button>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           </div>
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
 
           <Button className="w-full" type="submit" disabled={isPending}>
-            Login
+            {showToFactor ? "Submit" : "Login"}
           </Button>
         </form>
       </Form>
