@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { newVerification } from "@/actions/new-verification";
@@ -28,6 +27,7 @@ export const NewVerificationForm = () => {
         setError("Something went wrong");
         setSuccess(undefined);
       });
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [token, error, success]);
 
   useEffect(() => {
