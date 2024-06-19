@@ -1,5 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import LoginForm from "@/components/auth/login/login-form";
 interface LoginButtonProps {
   children: React.ReactNode;
   mode?: "modal" | "redirect";
@@ -18,13 +20,12 @@ export default function LoginButton({
   }
   if (mode === "modal") {
     return (
-      <button
-        onClick={onClick}
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-      >
-        {/* {children} */}
-        TODO : implement model mode
-      </button>
+      <Dialog>
+        <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
+        <DialogContent className="p-[56px]">
+          <LoginForm />
+        </DialogContent>
+      </Dialog>
     );
   }
   return (

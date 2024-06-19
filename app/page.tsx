@@ -18,12 +18,8 @@ export default function Home() {
         </h1>
         <p className="text-white text-lg">A simple authentication service</p>
         <div>
-          <LoginButton>
-            <Button
-              // onClick={() => console.log("CLICKED")}
-              variant={"secondary"}
-              size={"lg"}
-            >
+          <LoginButton mode="modal" asChild>
+            <Button variant={"secondary"} size={"lg"}>
               Sign in
             </Button>
           </LoginButton>
